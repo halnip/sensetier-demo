@@ -1,0 +1,1612 @@
+<title>SENSETIER AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap">
+
+<style>
+:root {
+  --bg-void:   #090b0e;
+  --bg-raised: #121820;
+  --gold:      #c5a880;
+  --gold-hi:   #dcc9a8;
+  --gold-lo:   #6e5c40;
+  --gold-glow: rgba(197,168,128,0.10);
+  --gold-rim:  rgba(197,168,128,0.22);
+  --cyan:      #4bc0c8;
+  --cyan-dim:  rgba(75,192,200,0.18);
+  --cyan-rim:  rgba(75,192,200,0.28);
+  --amber:     #c87c4b;
+  --green:     #3db88a;
+  --text-hi:   #e4dcd0;
+  --text-mid:  #8a8070;
+  --text-lo:   #42403c;
+  --border:    rgba(197,168,128,0.10);
+  --border-hi: rgba(197,168,128,0.22);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg-void);
+  color: var(--text-hi);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 0%, #14202e 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 85% 100%, #0a1420 0%, transparent 60%),
+    var(--bg-void);
+}
+
+.app { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+
+/* ── HEADER ── */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 54px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: rgba(9,11,14,0.85);
+  backdrop-filter: blur(16px);
+}
+
+.brand-lockup { display: flex; align-items: baseline; gap: 14px; }
+
+.brand-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 19px; font-weight: 400;
+  letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase;
+}
+
+.brand-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; font-weight: 300;
+  letter-spacing: 0.2em; color: var(--text-lo); text-transform: uppercase;
+}
+
+.badges { display: flex; gap: 10px; }
+
+.badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--border-hi);
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; letter-spacing: 0.18em;
+  color: var(--text-mid); text-transform: uppercase;
+}
+
+.dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--cyan);
+  animation: blink 2.2s ease-in-out infinite;
+}
+.dot.gold { background: var(--gold); animation-delay: 1.1s; }
+.dot.green { background: var(--green); animation-duration: 0.8s; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+/* ── MAIN ── */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* ── LEFT PANEL ── */
+.left-panel {
+  width: 42%; display: flex; flex-direction: column;
+  padding: 18px 22px; gap: 14px;
+  border-right: 1px solid var(--border);
+  overflow: hidden; flex-shrink: 0;
+}
+
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; letter-spacing: 0.26em;
+  color: var(--gold-lo); text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.scard {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  padding: 12px 14px; flex-shrink: 0;
+}
+
+.scard-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.scard-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; letter-spacing: 0.2em;
+  color: var(--text-lo); text-transform: uppercase;
+}
+
+.live-pip {
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+}
+
+/* Camera preview area */
+#cam-area {
+  margin-bottom: 8px;
+  position: relative;
+  border: 1px solid var(--cyan-rim);
+  overflow: hidden;
+}
+
+#cam-display {
+  display: block; width: 100%; height: 72px;
+  background: #060c10;
+}
+
+.cam-label {
+  position: absolute; bottom: 5px; left: 8px;
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.18em; color: var(--cyan);
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 5px;
+}
+
+.face-box {
+  position: absolute;
+  border: 1px solid rgba(75,192,200,0.5);
+  pointer-events: none;
+  top: 50%; left: 50%;
+  width: 44%; height: 80%;
+  transform: translate(-50%,-50%);
+  animation: facepulse 1.8s ease-in-out infinite;
+}
+
+@keyframes facepulse {
+  0%,100% { border-color: rgba(75,192,200,0.4); }
+  50%      { border-color: rgba(75,192,200,0.9); box-shadow: 0 0 12px rgba(75,192,200,0.2) inset; }
+}
+
+.sig-quality {
+  position: absolute; top: 5px; right: 8px;
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.12em; color: var(--text-lo); text-transform: uppercase;
+}
+
+/* HRV Canvas */
+#hrv-canvas { display: block; width: 100%; height: 68px; }
+
+.hrv-row { display: flex; gap: 18px; margin-top: 8px; }
+
+.hstat { display: flex; flex-direction: column; gap: 2px; }
+
+.hstat-label {
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.14em; color: var(--text-lo); text-transform: uppercase;
+}
+
+.hstat-val {
+  font-family: 'DM Mono', monospace; font-size: 13px;
+  color: var(--cyan); font-variant-numeric: tabular-nums;
+}
+
+/* Weather */
+.w-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.w-item { display: flex; flex-direction: column; gap: 3px; }
+
+.w-label {
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.14em; color: var(--text-lo); text-transform: uppercase;
+}
+
+.w-val {
+  font-family: 'DM Mono', monospace; font-size: 20px;
+  color: var(--text-hi); font-variant-numeric: tabular-nums; line-height: 1.1;
+}
+
+.w-unit { font-size: 9px; color: var(--text-mid); }
+
+.w-alert {
+  font-family: 'DM Mono', monospace; font-size: 8px;
+  color: var(--amber); letter-spacing: 0.08em; min-height: 12px;
+}
+
+/* Context */
+.ctx-time {
+  font-family: 'DM Mono', monospace; font-size: 26px;
+  color: var(--gold); font-variant-numeric: tabular-nums; line-height: 1;
+}
+
+.ctx-scene {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 14px; font-style: italic;
+  color: var(--text-mid); margin-top: 5px; line-height: 1.45;
+}
+
+.ctx-tag {
+  display: inline-block; margin-top: 7px;
+  padding: 2px 8px; border: 1px solid var(--border-hi);
+  font-family: 'DM Mono', monospace; font-size: 8px;
+  letter-spacing: 0.18em; color: var(--gold); text-transform: uppercase;
+}
+
+/* Scan button */
+.scan-wrap {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  min-height: 52px;
+}
+
+.scan-btn {
+  position: relative; width: 100%; max-width: 300px;
+  padding: 15px 20px; background: transparent;
+  border: 1px solid var(--gold); color: var(--gold);
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.26em; text-transform: uppercase;
+  cursor: pointer; overflow: hidden;
+  transition: color 0.3s, border-color 0.3s, opacity 0.4s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.scan-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: var(--gold-glow); opacity: 0; transition: opacity 0.3s;
+}
+
+.scan-btn:hover::after { opacity: 1; }
+.scan-btn.scanning { border-color: var(--cyan); color: var(--cyan); pointer-events: none; }
+.scan-btn.done { opacity: 0.4; pointer-events: none; }
+
+.scan-pbar {
+  position: absolute; bottom: 0; left: 0; height: 2px;
+  background: var(--cyan); width: 0%;
+  box-shadow: 0 0 10px var(--cyan); z-index: 1;
+}
+
+.scan-label { position: relative; z-index: 2; display: block; }
+
+/* ── RIGHT PANEL ── */
+.right-panel { flex: 1; position: relative; overflow: hidden; }
+
+.await-state {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+  transition: opacity 0.5s ease;
+}
+
+.await-rings { position: relative; display: flex; align-items: center; justify-content: center; }
+
+.await-ring {
+  width: 72px; height: 72px; border-radius: 50%;
+  border: 1px solid var(--border-hi);
+  border-top-color: var(--gold-lo);
+  animation: spin 5s linear infinite;
+}
+
+.await-inner-ring {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid rgba(75,192,200,0.15);
+  border-bottom-color: rgba(75,192,200,0.35);
+  position: absolute;
+  animation: spin 3s linear infinite reverse;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.await-text {
+  font-family: 'DM Mono', monospace; font-size: 8px;
+  letter-spacing: 0.28em; color: var(--text-lo); text-transform: uppercase;
+}
+
+.results-pane {
+  position: absolute; inset: 0; overflow-y: auto;
+  padding: 18px 26px; display: flex; flex-direction: column; gap: 14px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.7s ease 0.2s;
+}
+
+.results-pane.active { opacity: 1; pointer-events: auto; }
+
+.analysis-block {
+  background: linear-gradient(120deg, rgba(197,168,128,0.07) 0%, transparent 60%);
+  border: 1px solid var(--border-hi);
+  border-left: 2px solid var(--gold);
+  padding: 14px 16px;
+}
+
+.block-eyebrow {
+  font-family: 'DM Mono', monospace; font-size: 8px;
+  letter-spacing: 0.24em; color: var(--gold); text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.analysis-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 17px; font-weight: 400; line-height: 1.55;
+  color: var(--text-hi); text-wrap: balance;
+}
+
+.products { display: flex; flex-direction: column; gap: 7px; }
+
+.prod-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 14px; background: var(--bg-raised);
+  border: 1px solid var(--border); opacity: 0.3;
+  transition: opacity 0.4s, border-color 0.4s, background 0.4s, box-shadow 0.4s;
+}
+
+.prod-card.opt {
+  opacity: 1; border-color: var(--gold);
+  background: linear-gradient(90deg, rgba(197,168,128,0.10), transparent 70%);
+  box-shadow: 0 0 28px rgba(197,168,128,0.07);
+}
+
+.prod-num {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: 0.1em; color: var(--text-lo); min-width: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.prod-card.opt .prod-num { color: var(--gold); }
+
+.prod-info { flex: 1; }
+
+.prod-type {
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.22em; color: var(--text-lo); text-transform: uppercase;
+}
+
+.prod-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 21px; font-weight: 400; letter-spacing: 0.04em;
+  color: var(--text-hi); line-height: 1.15;
+}
+.prod-card.opt .prod-name { color: var(--gold-hi); }
+
+.opt-badge {
+  display: none;
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.15em; color: var(--gold);
+  border: 1px solid var(--gold); padding: 2px 7px; text-transform: uppercase;
+}
+.prod-card.opt .opt-badge { display: block; }
+
+.mol-section { padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.mol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+
+.mol-card { padding: 12px 14px; border: 1px solid var(--cyan-rim); background: var(--cyan-dim); }
+
+.mol-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 21px; font-style: italic; font-weight: 300;
+  color: var(--cyan); line-height: 1.1;
+}
+
+.mol-jp { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--text-lo); margin-top: 2px; }
+.mol-effect { font-size: 11px; line-height: 1.5; color: var(--text-mid); margin-top: 7px; }
+
+.staff-block {
+  display: flex; gap: 12px; align-items: flex-start;
+  background: rgba(75,192,200,0.05); border: 1px solid var(--cyan-rim);
+  padding: 13px 15px;
+}
+
+.staff-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+.staff-text { font-size: 13px; line-height: 1.6; color: var(--text-hi); }
+
+/* ── FOOTER ── */
+footer {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; height: 46px; flex-shrink: 0;
+  border-top: 1px solid var(--border);
+  background: rgba(9,11,14,0.9);
+  padding: 0 24px;
+}
+
+.footer-label {
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.24em; color: var(--text-lo); text-transform: uppercase;
+  margin-right: 6px;
+}
+
+.mode-btn {
+  padding: 5px 14px; border: 1px solid var(--border);
+  background: transparent; color: var(--text-lo);
+  font-family: 'DM Mono', monospace; font-size: 8px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  cursor: pointer; transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.mode-btn:hover { border-color: var(--gold-lo); color: var(--text-mid); }
+.mode-btn.on { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
+.mode-btn.dawn.on { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
+
+.prod-card.dawn.opt {
+  border-color: var(--cyan);
+  background: linear-gradient(90deg, rgba(75,192,200,0.08), transparent 70%);
+}
+.prod-card.dawn.opt .prod-num { color: var(--cyan); }
+.prod-card.dawn.opt .prod-name { color: #9ee8ed; }
+.prod-card.dawn.opt .opt-badge { border-color: var(--cyan); color: var(--cyan); }
+
+.brand-group { margin-bottom: 8px; }
+.brand-group-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold-lo); padding: 5px 0 6px;
+  border-bottom: 1px solid var(--border); margin-bottom: 6px;
+}
+.brand-group.dawn .brand-group-label { color: rgba(75,192,200,0.5); }
+
+.lang-btn {
+  padding: 4px 10px; border: 1px solid var(--border-hi);
+  background: transparent; color: var(--text-lo);
+  font-family: 'DM Mono', monospace; font-size: 8px;
+  letter-spacing: 0.18em; cursor: pointer;
+  transition: all 0.2s ease;
+}
+.lang-btn:hover { border-color: var(--gold-lo); color: var(--text-mid); }
+.lang-btn.active { border-color: var(--gold); color: var(--gold); }
+
+/* ── SCAN OVERLAY ── */
+.scan-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(6,9,12,0.88);
+  backdrop-filter: blur(24px) saturate(0.6);
+  align-items: center; justify-content: center;
+}
+.scan-overlay.active { display: flex; }
+
+.scan-modal {
+  width: 480px; max-width: 94vw;
+  background: var(--bg-raised);
+  border: 1px solid var(--cyan-rim);
+  box-shadow: 0 0 80px rgba(75,192,200,0.10);
+  display: flex; flex-direction: column;
+  animation: modalIn 0.3s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.scan-modal-header {
+  padding: 16px 20px 13px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: baseline; gap: 14px;
+}
+.scan-modal-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; letter-spacing: 0.26em;
+  color: var(--text-lo); text-transform: uppercase;
+}
+.scan-modal-status {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 0.12em;
+  color: var(--cyan); flex: 1;
+}
+
+.scan-cam-wrap {
+  position: relative;
+  background: #030810;
+  overflow: hidden;
+}
+#scan-cam-display {
+  display: block; width: 100%; height: 290px;
+  object-fit: cover;
+}
+.scan-face-guide {
+  position: absolute;
+  border: 1.5px solid rgba(75,192,200,0.55);
+  pointer-events: none;
+  top: 50%; left: 50%;
+  width: 36%; height: 80%;
+  transform: translate(-50%,-50%);
+  animation: facepulse 1.8s ease-in-out infinite;
+}
+.scan-face-guide::before,
+.scan-face-guide::after,
+.scan-face-guide .c3,
+.scan-face-guide .c4 {
+  content: ''; position: absolute;
+  width: 14px; height: 14px;
+  border-color: var(--cyan); border-style: solid;
+}
+.scan-face-guide::before { top:-1px; left:-1px; border-width:2px 0 0 2px; }
+.scan-face-guide::after  { top:-1px; right:-1px; border-width:2px 2px 0 0; }
+.scan-face-guide .c3 { bottom:-1px; left:-1px; border-width:0 0 2px 2px; }
+.scan-face-guide .c4 { bottom:-1px; right:-1px; border-width:0 2px 2px 0; }
+
+.scan-overlay-sig {
+  position: absolute; top: 10px; right: 12px;
+  font-family: 'DM Mono', monospace; font-size: 8px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: rgba(5,10,16,0.75); padding: 3px 9px;
+  border: 1px solid var(--border); color: var(--text-lo);
+}
+.scan-overlay-face-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px;
+  background: linear-gradient(to top, rgba(3,8,16,0.85), transparent);
+  font-family: 'DM Mono', monospace; font-size: 8px;
+  letter-spacing: 0.18em; color: var(--cyan); text-transform: uppercase;
+}
+
+.scan-modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.scan-modal-pbar-track {
+  width: 100%; height: 2px; background: rgba(75,192,200,0.12);
+}
+.scan-modal-pbar {
+  height: 100%; width: 0%;
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+  transition: width 0.12s linear;
+}
+.scan-modal-hint {
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.18em; color: var(--text-lo); text-transform: uppercase;
+  text-align: center;
+}
+
+/* sim-only state (no camera) */
+.scan-cam-wrap.sim-mode #scan-cam-display { display: none; }
+.scan-cam-wrap.sim-mode .scan-face-guide  { display: none; }
+.scan-sim-anim {
+  display: none; align-items: center; justify-content: center;
+  height: 290px;
+}
+.scan-cam-wrap.sim-mode .scan-sim-anim { display: flex; }
+.scan-sim-ring {
+  width: 88px; height: 88px; border-radius: 50%;
+  border: 1px solid var(--border-hi); border-top-color: var(--cyan);
+  animation: spin 2.5s linear infinite;
+}
+.scan-sim-inner {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 1px solid rgba(75,192,200,0.2); border-bottom-color: rgba(75,192,200,0.5);
+  position: absolute; animation: spin 1.6s linear infinite reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot, .await-ring, .await-inner-ring, .face-box, .scan-face-guide { animation: none; }
+}
+</style>
+
+<div class="app">
+
+  <header>
+    <div class="brand-lockup">
+      <span class="brand-name">SENSETIER</span>
+      <span class="brand-sub">AI &mdash; Biometric Tuning OS &nbsp;v1.0</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="badges">
+        <div class="badge"><div class="dot"></div><span id="badge-sensor">SENSOR CONNECTED</span></div>
+        <div class="badge" id="cam-badge" style="display:none"><div class="dot green"></div><span id="badge-camera">CAMERA ACTIVE</span></div>
+        <div class="badge"><div class="dot gold"></div><span id="badge-api">API LIVE</span></div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" id="btn-ja" onclick="setLang('ja')">JA</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <div class="left-panel">
+
+      <!-- 01 BIOMETRIC -->
+      <div class="scard">
+        <div class="scard-head">
+          <span class="scard-title" id="lbl-bio">Body · Biometric</span>
+          <div class="live-pip" id="bio-pip" style="color:var(--cyan)">
+            <div class="dot" style="width:4px;height:4px;animation-duration:1.5s"></div>LIVE
+          </div>
+        </div>
+
+        <!-- Camera preview (hidden until scan) -->
+        <div id="cam-area" style="display:none">
+          <canvas id="cam-display"></canvas>
+          <div class="face-box"></div>
+          <div class="cam-label">
+            <div class="dot green" style="width:4px;height:4px"></div>
+            <span id="cam-face-label">Face the camera</span>
+          </div>
+          <div class="sig-quality" id="sig-quality">SIGNAL —</div>
+        </div>
+
+        <canvas id="hrv-canvas" height="68"></canvas>
+
+        <div class="hrv-row">
+          <div class="hstat">
+            <span class="hstat-label" id="lbl-hrv">HRV (RMSSD)</span>
+            <span class="hstat-val" id="v-hrv">38 ms</span>
+          </div>
+          <div class="hstat">
+            <span class="hstat-label" id="lbl-stress">Stress</span>
+            <span class="hstat-val" id="v-stress">72%</span>
+          </div>
+          <div class="hstat">
+            <span class="hstat-label" id="lbl-ans">ANS Balance</span>
+            <span class="hstat-val" id="v-ans" style="font-size:11px">Sympathetic</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02 WEATHER -->
+      <div class="scard">
+        <div class="scard-head">
+          <span class="scard-title" id="lbl-env">Environment · Fukuoka Tenjin</span>
+          <span style="font-family:'DM Mono',monospace;font-size:7px;letter-spacing:0.12em;color:var(--text-lo)" id="weather-updated"></span>
+        </div>
+        <div class="w-grid">
+          <div class="w-item">
+            <span class="w-label" id="lbl-pressure">Pressure</span>
+            <span class="w-val"><span id="v-pressure">1004</span><span class="w-unit"> hPa</span></span>
+            <span class="w-alert" id="v-alert">&#9660; LOW PRESSURE</span>
+          </div>
+          <div class="w-item">
+            <span class="w-label" id="lbl-humidity">Humidity</span>
+            <span class="w-val"><span id="v-humidity">68</span><span class="w-unit"> %</span></span>
+          </div>
+          <div class="w-item">
+            <span class="w-label" id="lbl-temp">Temp</span>
+            <span class="w-val"><span id="v-temp">22</span><span class="w-unit"> °C</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 CONTEXT -->
+      <div class="scard">
+        <div class="scard-head">
+          <span class="scard-title" id="lbl-ctx">Context · Situation</span>
+        </div>
+        <div class="ctx-time" id="v-time">14:30</div>
+        <div class="ctx-scene" id="v-scene">登壇・商談直前 — 高い集中と緊張感の狭間</div>
+        <div class="ctx-tag" id="v-zone">Focus &amp; Tension Zone</div>
+      </div>
+
+      <div class="scan-wrap">
+        <button class="scan-btn" id="scan-btn" onclick="startScan()">
+          <div class="scan-pbar" id="scan-pbar"></div>
+          <span class="scan-label" id="scan-label">START BIOMETRIC SCAN</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: ANALYSIS -->
+    <div class="right-panel">
+
+      <div class="await-state" id="await-state">
+        <div class="await-rings">
+          <div class="await-ring"></div>
+          <div class="await-inner-ring"></div>
+        </div>
+        <div class="await-text" id="await-text">Awaiting Scan Input</div>
+      </div>
+
+      <div class="results-pane" id="results-pane">
+
+        <div class="analysis-block">
+          <div class="block-eyebrow" id="eyebrow-ai">AI Analysis · Detected</div>
+          <div class="analysis-text" id="v-analysis">
+            低気圧による潜在的ストレス＋登壇前の強い交感神経優位を検知。副交感神経活性化と不安抑制が優先課題です。
+          </div>
+        </div>
+
+        <div>
+          <div class="eyebrow" id="eyebrow-rec">Optimal Formula · Recommendation</div>
+
+          <div class="brand-group" id="breeze-group">
+            <div class="brand-group-label" id="brand-label-breeze">BREEZE in Caldera Flora</div>
+            <div class="products">
+              <div class="prod-card" id="prod-0">
+                <div class="prod-num">01</div>
+                <div class="prod-info">
+                  <div class="prod-type" id="ptype-0">SPACE</div>
+                  <div class="prod-name" id="pname-0">Blend Essential Oil</div>
+                </div>
+                <div class="opt-badge" id="pbadge-0">Optimal</div>
+              </div>
+              <div class="prod-card" id="prod-1">
+                <div class="prod-num">02</div>
+                <div class="prod-info">
+                  <div class="prod-type" id="ptype-1">SKIN</div>
+                  <div class="prod-name" id="pname-1">Roll-on Perfume</div>
+                </div>
+                <div class="opt-badge" id="pbadge-1">Optimal</div>
+              </div>
+              <div class="prod-card" id="prod-2">
+                <div class="prod-num">03</div>
+                <div class="prod-info">
+                  <div class="prod-type" id="ptype-2">FABRIC</div>
+                  <div class="prod-name" id="pname-2">Tuning Mist</div>
+                </div>
+                <div class="opt-badge" id="pbadge-2">Optimal</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="brand-group dawn" id="dawn-group">
+            <div class="brand-group-label" id="brand-label-dawn">DAWN in Alps</div>
+            <div class="products">
+              <div class="prod-card dawn" id="prod-3">
+                <div class="prod-num">04</div>
+                <div class="prod-info">
+                  <div class="prod-type" id="ptype-3">SPACE</div>
+                  <div class="prod-name" id="pname-3">Blend Essential Oil</div>
+                </div>
+                <div class="opt-badge" id="pbadge-3">Optimal</div>
+              </div>
+              <div class="prod-card dawn" id="prod-4">
+                <div class="prod-num">05</div>
+                <div class="prod-info">
+                  <div class="prod-type" id="ptype-4">SKIN</div>
+                  <div class="prod-name" id="pname-4">Roll-on Perfume</div>
+                </div>
+                <div class="opt-badge" id="pbadge-4">Optimal</div>
+              </div>
+              <div class="prod-card dawn" id="prod-5">
+                <div class="prod-num">06</div>
+                <div class="prod-info">
+                  <div class="prod-type" id="ptype-5">FABRIC</div>
+                  <div class="prod-name" id="pname-5">Tuning Mist</div>
+                </div>
+                <div class="opt-badge" id="pbadge-5">Optimal</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mol-section">
+          <div class="eyebrow" id="eyebrow-mol">Active Molecules · Evidence</div>
+          <div class="mol-grid">
+            <div class="mol-card">
+              <div class="mol-name" id="v-mol1-name">Linalool</div>
+              <div class="mol-jp" id="v-mol1-jp">リナロール</div>
+              <div class="mol-effect" id="v-mol1-fx">α波誘導・沈静作用。GABAₐ受容体を介した不安軽減</div>
+            </div>
+            <div class="mol-card">
+              <div class="mol-name" id="v-mol2-name">α-Pinene</div>
+              <div class="mol-jp" id="v-mol2-jp">α-ピネン</div>
+              <div class="mol-effect" id="v-mol2-fx">森林浴効果・緊張緩和。コルチゾール抑制に寄与</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="staff-block">
+          <div class="staff-icon">👉</div>
+          <div class="staff-text" id="v-staff">
+            スタッフから<strong>Roll-on Perfume</strong>を受け取り、手首内側に軽く塗布してお試しください。
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SCAN OVERLAY -->
+  <div class="scan-overlay" id="scan-overlay">
+    <div class="scan-modal">
+      <div class="scan-modal-header">
+        <span class="scan-modal-title">BIOMETRIC SCAN</span>
+        <span class="scan-modal-status" id="scan-overlay-status">INITIALIZING...</span>
+      </div>
+      <div class="scan-cam-wrap" id="scan-cam-wrap">
+        <canvas id="scan-cam-display"></canvas>
+        <div class="scan-face-guide">
+          <span class="c3"></span><span class="c4"></span>
+        </div>
+        <div class="scan-overlay-sig" id="scan-overlay-sig">SIGNAL —</div>
+        <div class="scan-overlay-face-label">
+          <div class="dot green" style="width:4px;height:4px"></div>
+          <span id="scan-overlay-face-label">Face the camera</span>
+        </div>
+        <div class="scan-sim-anim">
+          <div class="scan-sim-ring"></div>
+          <div class="scan-sim-inner"></div>
+        </div>
+      </div>
+      <div class="scan-modal-footer">
+        <div class="scan-modal-pbar-track">
+          <div class="scan-modal-pbar" id="scan-modal-pbar"></div>
+        </div>
+        <div class="scan-modal-hint" id="scan-modal-hint">Keep still — measuring heart rate variability</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span class="footer-label" id="footer-label">Demo Mode</span>
+    <button class="mode-btn" id="mb0" onclick="setMode(0)">Morning · Low P</button>
+    <button class="mode-btn on" id="mb1" onclick="setMode(1)">Midday · Tension</button>
+    <button class="mode-btn" id="mb2" onclick="setMode(2)">Night · Fatigue</button>
+    <button class="mode-btn dawn" id="mb3" onclick="setMode(3)">Morning · Alps</button>
+  </footer>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// HRV CANVAS — animated waveform / PPG signal
+// ══════════════════════════════════════════
+const canvas  = document.getElementById('hrv-canvas');
+const ctx2d   = canvas.getContext('2d');
+let phase     = 0;
+let lastT     = 0;
+let ppgMode   = false;   // true during camera scan
+
+function resizeCanvas() {
+  const r = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width  = r.width  * dpr;
+  canvas.height = r.height * dpr;
+  ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+// ── Simulated HRV waveform
+function drawHRVSim(ts) {
+  const dt = ts - lastT; lastT = ts;
+  phase += dt * 0.00095;
+  const W = canvas.getBoundingClientRect().width;
+  const H = canvas.getBoundingClientRect().height;
+  const mid = H / 2;
+
+  ctx2d.fillStyle = 'rgba(13,16,22,0.25)';
+  ctx2d.fillRect(0, 0, W, H);
+
+  const pts = [];
+  for (let i = 0; i <= 180; i++) {
+    const t = (i / 180) * Math.PI * 7 + phase;
+    let y = Math.sin(t) * 10 + Math.sin(t * 2.1) * 4 + Math.sin(t * 0.33) * 9;
+    const cycle = ((t % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    const norm  = cycle / (Math.PI * 2);
+    if (norm > 0.42 && norm < 0.58) {
+      const u  = (norm - 0.42) / 0.16;
+      y += (norm < 0.5 ? -1 : 1) * Math.sin(u * Math.PI) ** 2 * 26;
+    }
+    pts.push({ x: (i / 180) * W, y: mid - y });
+  }
+
+  const gr = ctx2d.createLinearGradient(0, 0, W, 0);
+  gr.addColorStop(0,    'rgba(75,192,200,0.0)');
+  gr.addColorStop(0.15, 'rgba(75,192,200,0.7)');
+  gr.addColorStop(0.7,  'rgba(197,168,128,0.85)');
+  gr.addColorStop(1,    'rgba(197,168,128,0.0)');
+
+  ctx2d.save();
+  ctx2d.shadowColor = '#4bc0c8';
+  ctx2d.shadowBlur  = 7;
+  ctx2d.beginPath();
+  ctx2d.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) {
+    const p = pts[i-1], c = pts[i];
+    ctx2d.quadraticCurveTo(p.x, p.y, (p.x+c.x)/2, (p.y+c.y)/2);
+  }
+  ctx2d.strokeStyle = gr;
+  ctx2d.lineWidth   = 1.5;
+  ctx2d.stroke();
+  ctx2d.restore();
+
+  ctx2d.beginPath();
+  ctx2d.moveTo(0, mid); ctx2d.lineTo(W, mid);
+  ctx2d.strokeStyle = 'rgba(197,168,128,0.07)';
+  ctx2d.lineWidth = 1;
+  ctx2d.stroke();
+}
+
+// ── Live PPG signal display
+function drawPPGSignal() {
+  const W  = canvas.getBoundingClientRect().width;
+  const H  = canvas.getBoundingClientRect().height;
+  const mid = H / 2;
+
+  ctx2d.fillStyle = 'rgba(6,12,16,0.35)';
+  ctx2d.fillRect(0, 0, W, H);
+
+  if (ppgRaw.length < 4) return;
+
+  const N = Math.min(ppgRaw.length, Math.floor(W));
+  const slice = ppgRaw.slice(-N);
+
+  // detrend: subtract 2s moving average
+  const win = Math.min(60, Math.floor(N * 0.4));
+  const det = slice.map((v, i) => {
+    const s = Math.max(0, i - win), e = Math.min(N, i + win);
+    let sum = 0; for (let j = s; j < e; j++) sum += slice[j];
+    return v - sum / (e - s);
+  });
+
+  const maxV = Math.max(...det.map(Math.abs)) || 1;
+
+  ctx2d.save();
+  ctx2d.shadowColor = '#4bc0c8';
+  ctx2d.shadowBlur  = 5;
+  ctx2d.beginPath();
+  det.forEach((v, i) => {
+    const x = (i / (N - 1)) * W;
+    const y = mid - (v / maxV) * (H * 0.42);
+    i === 0 ? ctx2d.moveTo(x, y) : ctx2d.lineTo(x, y);
+  });
+  ctx2d.strokeStyle = '#4bc0c8';
+  ctx2d.lineWidth   = 1.5;
+  ctx2d.stroke();
+  ctx2d.restore();
+
+  // Scan cursor
+  ctx2d.fillStyle = 'rgba(75,192,200,0.5)';
+  ctx2d.fillRect(W - 2, 0, 2, H);
+
+  // Grid baseline
+  ctx2d.beginPath();
+  ctx2d.moveTo(0, mid); ctx2d.lineTo(W, mid);
+  ctx2d.strokeStyle = 'rgba(75,192,200,0.12)';
+  ctx2d.lineWidth = 1;
+  ctx2d.stroke();
+}
+
+function animLoop(ts) {
+  if (!ppgMode) {
+    drawHRVSim(ts);
+  } else {
+    drawPPGSignal();
+  }
+  requestAnimationFrame(animLoop);
+}
+
+resizeCanvas();
+requestAnimationFrame(animLoop);
+window.addEventListener('resize', resizeCanvas);
+
+// ══════════════════════════════════════════
+// CAMERA / rPPG ENGINE
+// ══════════════════════════════════════════
+let camStream   = null;
+let camVideo    = null;
+let procCanvas  = null;
+let procCtx     = null;
+let camDispCanvas = null;
+let camDispCtx  = null;
+
+let ppgRaw      = [];
+let ppgTimes    = [];
+let sampleTimer = null;
+let scanDone    = false;
+let scanning    = false;
+let currentMode = 1;
+let realWeather = null;
+
+function pressureAlert(hpa) {
+  if (hpa < 990)  return '▼▼▼ EXTREME LOW';
+  if (hpa < 1000) return '▼▼ VERY LOW';
+  if (hpa < 1008) return '▼ LOW PRESSURE';
+  if (hpa > 1022) return '▲ HIGH PRESSURE';
+  return '';
+}
+
+function getGeoCoords() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) { resolve(null); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+      ()  => resolve(null),
+      { timeout: 8000, maximumAge: 5 * 60 * 1000 }
+    );
+  });
+}
+
+let geoCoords = null; // cached after first successful fix
+
+async function fetchWeather() {
+  try {
+    // Try GPS; reuse cached fix if still fresh (position age handled by maximumAge above)
+    const coords = await getGeoCoords();
+    if (coords) geoCoords = coords;
+    const lat = geoCoords ? geoCoords.lat.toFixed(4) : '33.5904';
+    const lon = geoCoords ? geoCoords.lon.toFixed(4) : '130.4017';
+
+    const url = 'https://api.open-meteo.com/v1/forecast' +
+      `?latitude=${lat}&longitude=${lon}` +
+      '&current=surface_pressure,temperature_2m,relative_humidity_2m' +
+      '&timezone=auto';
+    const res  = await fetch(url);
+    const data = await res.json();
+    const c    = data.current;
+    realWeather = {
+      pressure: Math.round(c.surface_pressure),
+      temp:     Math.round(c.temperature_2m),
+      humidity: Math.round(c.relative_humidity_2m)
+    };
+    applyMode(currentMode);
+    const hhmm = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    const el = document.getElementById('weather-updated');
+    if (el) el.textContent = 'as of ' + hhmm;
+    const apiLabel = document.getElementById('badge-api');
+    if (apiLabel) apiLabel.textContent = currentLang === 'ja' ? 'ウェザー ライブ' : 'WEATHER LIVE';
+    // Update location label based on whether GPS fix was obtained
+    const envLabel = document.getElementById('lbl-env');
+    if (envLabel) {
+      if (geoCoords) {
+        envLabel.textContent = currentLang === 'ja'
+          ? `環境 · 現在地 (${geoCoords.lat.toFixed(2)}°N)`
+          : `Environment · Current Location (${geoCoords.lat.toFixed(2)}°N)`;
+      } else {
+        envLabel.textContent = currentLang === 'ja' ? '環境 · 福岡天神 (デモ)' : 'Environment · Fukuoka (demo)';
+      }
+    }
+  } catch (_) {
+    // Network blocked or unavailable — demo values remain
+  }
+}
+
+// Refresh every 10 minutes
+fetchWeather();
+setInterval(fetchWeather, 10 * 60 * 1000);
+
+async function initCamera() {
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } }
+    });
+  } catch (e) {
+    return false;
+  }
+
+  camVideo = document.createElement('video');
+  camVideo.srcObject = camStream;
+  camVideo.autoplay  = true;
+  camVideo.playsInline = true;
+  camVideo.muted     = true;
+  // iOS Safari requires the video element to be in the DOM to render frames
+  Object.assign(camVideo.style, {
+    position:'fixed', width:'1px', height:'1px',
+    opacity:'0', pointerEvents:'none', top:'-9999px'
+  });
+  document.body.appendChild(camVideo);
+
+  await new Promise(res => { camVideo.onloadedmetadata = res; });
+  camVideo.play();
+
+  procCanvas = document.createElement('canvas');
+  procCanvas.width  = 160;
+  procCanvas.height = 120;
+  procCtx = procCanvas.getContext('2d', { willReadFrequently: true });
+
+  return true;
+}
+
+function sampleAndDraw() {
+  if (!camVideo || camVideo.readyState < 2) return;
+
+  const PW = procCanvas.width, PH = procCanvas.height;
+  procCtx.drawImage(camVideo, 0, 0, PW, PH);
+
+  // ROI: central 60% of frame (face region)
+  const rx = Math.floor(PW * 0.2), ry = Math.floor(PH * 0.2);
+  const rw = Math.floor(PW * 0.6), rh = Math.floor(PH * 0.6);
+  const id = procCtx.getImageData(rx, ry, rw, rh);
+  const d  = id.data;
+  let gSum = 0;
+  for (let i = 0; i < d.length; i += 4) gSum += d[i + 1];
+  ppgRaw.push(gSum / (rw * rh));
+  ppgTimes.push(performance.now());
+
+  // Draw mirrored tinted preview
+  const DW = camDispCanvas.width, DH = camDispCanvas.height;
+  camDispCtx.save();
+  camDispCtx.translate(DW, 0); camDispCtx.scale(-1, 1);
+  camDispCtx.drawImage(camVideo, 0, 0, DW, DH);
+  camDispCtx.restore();
+  // Tint overlay
+  camDispCtx.fillStyle = 'rgba(6,18,24,0.55)';
+  camDispCtx.fillRect(0, 0, DW, DH);
+  // Scanline shimmer
+  const shimY = (performance.now() / 8) % DH;
+  camDispCtx.fillStyle = 'rgba(75,192,200,0.06)';
+  camDispCtx.fillRect(0, shimY, DW, 2);
+
+  // Signal quality indicator
+  updateSigQuality();
+}
+
+let sqWindow = [];
+function updateSigQuality() {
+  const N = ppgRaw.length;
+  if (N < 20) return;
+  const slice = ppgRaw.slice(-20);
+  const mean = slice.reduce((a,b)=>a+b,0)/20;
+  const sd   = Math.sqrt(slice.reduce((a,b)=>a+(b-mean)**2,0)/20);
+  sqWindow.push(sd);
+  if (sqWindow.length > 5) sqWindow.shift();
+  const avgSd = sqWindow.reduce((a,b)=>a+b,0)/sqWindow.length;
+
+  const el = document.getElementById('scan-overlay-sig');
+  if (!el) return;
+  if (avgSd > 0.8) { el.textContent = 'SIGNAL ●●●'; el.style.color = 'var(--green)'; }
+  else if (avgSd > 0.3) { el.textContent = 'SIGNAL ●●○'; el.style.color = 'var(--gold)'; }
+  else { el.textContent = 'SIGNAL ●○○'; el.style.color = 'var(--amber)'; }
+}
+
+function stopCamera() {
+  if (sampleTimer) { clearInterval(sampleTimer); sampleTimer = null; }
+  if (camStream)   { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  if (camVideo && camVideo.parentNode) { camVideo.parentNode.removeChild(camVideo); }
+}
+
+function computeMetrics() {
+  const N = ppgRaw.length;
+  if (N < 120) return null;   // need ~4s minimum
+
+  // Detrend: subtract 3s moving average
+  const win = Math.min(90, Math.floor(N * 0.3));
+  const det = ppgRaw.map((v, i) => {
+    const s = Math.max(0, i - win), e = Math.min(N, i + win);
+    let sum = 0; for (let j = s; j < e; j++) sum += ppgRaw[j];
+    return v - sum / (e - s);
+  });
+
+  // Actual sample rate
+  const rate = (N - 1) / ((ppgTimes[N-1] - ppgTimes[0]) / 1000);
+
+  // Normalize
+  const maxV = Math.max(...det.map(Math.abs)) || 1;
+  const norm  = det.map(v => v / maxV);
+
+  // Peak detection: local max > 0.25, min spacing = 0.35s (170bpm max)
+  const minGap = Math.floor(rate * 0.35);
+  const peaks = [];
+  for (let i = minGap; i < N - minGap; i++) {
+    if (norm[i] < 0.25) continue;
+    let ok = true;
+    for (let j = i - minGap; j <= i + minGap; j++) {
+      if (j !== i && norm[j] >= norm[i]) { ok = false; break; }
+    }
+    if (ok) peaks.push(i);
+  }
+
+  if (peaks.length < 4) return null;
+
+  // RR intervals
+  const rr = [];
+  for (let i = 1; i < peaks.length; i++) {
+    const dt = ppgTimes[peaks[i]] - ppgTimes[peaks[i-1]];
+    if (dt > 350 && dt < 1500) rr.push(dt);  // 40–170 bpm range
+  }
+
+  if (rr.length < 3) return null;
+
+  const meanRR = rr.reduce((a,b)=>a+b,0) / rr.length;
+  const bpm    = Math.round(60000 / meanRR);
+
+  // RMSSD (ms)
+  let ssq = 0;
+  for (let i = 1; i < rr.length; i++) ssq += (rr[i] - rr[i-1]) ** 2;
+  const rmssd = Math.round(Math.sqrt(ssq / (rr.length - 1)));
+
+  // Stress: 0-100, inverse of HRV (RMSSD 10→90% stress, 70→20% stress)
+  const stress = Math.max(15, Math.min(92, Math.round(100 - (rmssd / 65) * 80)));
+
+  // ANS balance
+  let ans;
+  if      (rmssd < 18) ans = 'Sympathetic ↑↑';
+  else if (rmssd < 30) ans = 'Sympathetic';
+  else if (rmssd < 48) ans = 'Balanced';
+  else                 ans = 'Parasympathetic';
+
+  return { bpm, rmssd, stress, ans };
+}
+
+// ══════════════════════════════════════════
+// SCAN FLOW
+// ══════════════════════════════════════════
+function showScanOverlay(camMode) {
+  const overlay = document.getElementById('scan-overlay');
+  const wrap    = document.getElementById('scan-cam-wrap');
+  overlay.classList.add('active');
+  if (camMode) {
+    wrap.classList.remove('sim-mode');
+    document.getElementById('scan-modal-hint').textContent =
+      currentLang === 'ja' ? '静止してください — 心拍変動を計測中' : 'Keep still — measuring heart rate variability';
+  } else {
+    wrap.classList.add('sim-mode');
+    document.getElementById('scan-modal-hint').textContent =
+      currentLang === 'ja' ? 'バイオメトリックデータを解析中...' : 'Analyzing biometric data...';
+  }
+}
+
+function hideScanOverlay() {
+  document.getElementById('scan-overlay').classList.remove('active');
+}
+
+function setOverlayStatus(text) {
+  document.getElementById('scan-overlay-status').textContent = text;
+}
+
+async function startScan() {
+  if (scanning || scanDone) return;
+  scanning = true;
+
+  const btn   = document.getElementById('scan-btn');
+  const label = document.getElementById('scan-label');
+  const pbar  = document.getElementById('scan-pbar');
+  const opbar = document.getElementById('scan-modal-pbar');
+
+  btn.classList.add('scanning');
+  label.textContent = '●  SCANNING';
+  setOverlayStatus('INITIALIZING CAMERA...');
+  showScanOverlay(false);  // show overlay immediately (sim mode until cam ready)
+
+  const hasCam = await initCamera();
+
+  if (!hasCam) {
+    runSimScan(btn, label, pbar, opbar);
+    return;
+  }
+
+  // Camera ready — switch to cam mode (remove sim-mode FIRST so canvas is visible on iOS)
+  document.getElementById('scan-cam-wrap').classList.remove('sim-mode');
+  document.getElementById('cam-badge').style.display = 'flex';
+  document.getElementById('scan-overlay-face-label').textContent =
+    currentLang === 'ja' ? '顔をカメラに向けてください' : 'Face the camera';
+
+  // Initialize display canvas AFTER it becomes visible (required for iOS Safari)
+  await new Promise(r => requestAnimationFrame(r));
+  camDispCanvas = document.getElementById('scan-cam-display');
+  camDispCanvas.width  = 640;
+  camDispCanvas.height = 360;
+  camDispCtx = camDispCanvas.getContext('2d');
+
+  ppgMode = true;
+  ppgRaw = []; ppgTimes = []; sqWindow = [];
+  sampleTimer = setInterval(sampleAndDraw, 33);
+
+  const DURATION = 15000;
+  const t0 = performance.now();
+
+  const steps = [
+    { at: 0,    text: 'PULSE SIGNAL ACQUIRING...' },
+    { at: 0.18, text: 'PULSE SIGNAL DETECTED' },
+    { at: 0.42, text: 'ANALYZING HRV PATTERNS...' },
+    { at: 0.65, text: 'CROSS-REF WEATHER STRESS...' },
+    { at: 0.82, text: 'GENERATING PRESCRIPTION...' },
+  ];
+  let si = 0;
+
+  function tick(now) {
+    const pct = Math.min((now - t0) / DURATION, 1);
+    pbar.style.width  = (pct * 100) + '%';
+    opbar.style.width = (pct * 100) + '%';
+
+    for (let i = steps.length - 1; i >= 0; i--) {
+      if (pct >= steps[i].at && i !== si) {
+        si = i;
+        setOverlayStatus(steps[i].text);
+        break;
+      }
+    }
+
+    if (pct < 1) { requestAnimationFrame(tick); return; }
+
+    stopCamera();
+    ppgMode = false;
+    document.getElementById('cam-badge').style.display = 'none';
+
+    const metrics = computeMetrics();
+
+    scanning = false; scanDone = true;
+    btn.classList.remove('scanning'); btn.classList.add('done');
+    pbar.style.background = '#c5a880';
+    pbar.style.boxShadow  = '0 0 10px #c5a880';
+    opbar.style.background = '#c5a880';
+    label.textContent = currentLang === 'ja' ? '✓  計測完了' : '✓  SCAN COMPLETE';
+
+    if (metrics) {
+      document.getElementById('v-hrv').textContent    = metrics.rmssd + ' ms';
+      document.getElementById('v-stress').textContent = metrics.stress + '%';
+      document.getElementById('v-ans').textContent    = metrics.ans;
+      MODES.forEach(m => { m.hrvBase = metrics.rmssd; });
+    }
+
+    setOverlayStatus(currentLang === 'ja' ? '✓  計測完了' : '✓  SCAN COMPLETE');
+    setTimeout(hideScanOverlay, 900);
+    showResults();
+  }
+
+  requestAnimationFrame(tick);
+}
+
+function runSimScan(btn, label, pbar, opbar) {
+  const DURATION = 5000;
+  const steps = [
+    'READING HRV SIGNAL...',
+    'ANALYZING ANS BALANCE...',
+    'CROSS-REF WEATHER API...',
+    'MATCHING FORMULA DB...',
+    'GENERATING PRESCRIPTION...',
+  ];
+  const t0 = performance.now();
+  let si = 0;
+
+  function tick(now) {
+    const pct = Math.min((now - t0) / DURATION, 1);
+    pbar.style.width  = (pct * 100) + '%';
+    if (opbar) opbar.style.width = (pct * 100) + '%';
+    const ni = Math.min(Math.floor(pct * steps.length), steps.length - 1);
+    if (ni !== si) { si = ni; label.textContent = '●  SCANNING'; setOverlayStatus(steps[si]); }
+    if (pct < 1) { requestAnimationFrame(tick); return; }
+
+    scanning = false; scanDone = true;
+    btn.classList.remove('scanning'); btn.classList.add('done');
+    pbar.style.background = '#c5a880';
+    pbar.style.boxShadow  = '0 0 10px #c5a880';
+    if (opbar) opbar.style.background = '#c5a880';
+    label.textContent = currentLang === 'ja' ? '✓  計測完了' : '✓  SCAN COMPLETE';
+    setOverlayStatus(currentLang === 'ja' ? '✓  計測完了' : '✓  SCAN COMPLETE');
+    setTimeout(hideScanOverlay, 900);
+    showResults();
+  }
+
+  requestAnimationFrame(tick);
+}
+
+function showResults() {
+  applyMode(currentMode);
+  const aw = document.getElementById('await-state');
+  aw.style.opacity = '0'; aw.style.pointerEvents = 'none';
+  setTimeout(() => {
+    aw.style.display = 'none';
+    document.getElementById('results-pane').classList.add('active');
+  }, 500);
+}
+
+// ══════════════════════════════════════════
+// MODE DATA
+// ══════════════════════════════════════════
+const MODES = [
+  {
+    time: '08:15', zone: 'Low Pressure · Sluggish Zone',
+    pressure: '998', alert: '▼▼ VERY LOW', temp: '19',
+    hrv: '42 ms', stress: '58%', ans: 'Balanced', hrvBase: 42, rec: 0,
+    scene: {
+      en: 'Morning prep — barometric stress, heavy head',
+      ja: '朝の会議準備 — 低気圧接近による頭重感と気分の沈み'
+    },
+    analysis: {
+      en: 'Barometric stress detected. Limonene from Blood Orange & Holyfoot activates the serotonin pathway, while 1,8-Cineole (Holyfoot 35%, Camphor White 17%) immediately opens the airways and relieves barometric head pressure.',
+      ja: '低気圧接近による気象性ストレスを検知。ブラッドオレンジ・ホーリーフ由来のリモネンがセロトニン経路を賦活し、ホーリーフ35%・カンファーホワイト17%由来の1,8-シネオールが低気圧性の頭部圧迫感と気道の滞りを即時に開通します。'
+    },
+    mol1: ['d-Limonene', 'リモネン', {
+      en: 'From Blood Orange (<98%) & Holyfoot (25%). Activates serotonin pathway — counters barometric fatigue and energy dip.',
+      ja: 'ブラッドオレンジ（<98%）・ホーリーフ（25%）由来。セロトニン経路賦活・気圧変動による倦怠感とエネルギー低下に対抗'
+    }],
+    mol2: ['1,8-Cineole', '1,8-シネオール', {
+      en: 'From Holyfoot (35%) & Camphor White (17.21%). Clears airways and eases barometric head pressure.',
+      ja: 'ホーリーフ（35%）・カンファーホワイト（17.21%）由来。呼吸器系を開通し低気圧性頭部圧迫感を緩和'
+    }],
+    staff: {
+      en: 'Staff will hand you a <strong>Blend Essential Oil</strong> sample. Apply 1–2 drops to your palm and breathe deeply to experience the effect.',
+      ja: 'スタッフから<strong>Blend Essential Oil</strong>のサンプルをお渡しします。手のひらに1〜2滴取り、深呼吸しながらご体感ください。'
+    }
+  },
+  {
+    time: '14:30', zone: 'Focus & Tension Zone',
+    pressure: '1004', alert: '▼ LOW PRESSURE', temp: '22',
+    hrv: '38 ms', stress: '72%', ans: 'Sympathetic', hrvBase: 38, rec: 1,
+    scene: {
+      en: 'Pre-presentation / pitch — peak focus, high nervous tension',
+      ja: '登壇・商談直前 — 高い集中と緊張感の狭間'
+    },
+    analysis: {
+      en: 'Low-pressure stress combined with pre-presentation sympathetic dominance detected. Linalyl Acetate (41.27%) from Petitgrain and Linalool from Palmarosa, Petitgrain & Ylang Ylang promote rapid parasympathetic shift via the GABAₐ pathway.',
+      ja: '低気圧ストレス＋登壇前の交感神経優位を検知。プチグレイン由来の酢酸リナリル（41.27%）とパルマローザ・イランイラン・プチグレイン由来のリナロールが、GABAₐ経路を介して副交感神経へのシフトを迅速に促します。'
+    },
+    mol1: ['Linalyl Acetate', '酢酸リナリル', {
+      en: 'From Petitgrain (41.27%). Parasympathetic switch — accelerates rapid transition from tension to calm.',
+      ja: 'プチグレイン（41.27%）由来。副交感神経スイッチ・緊張状態からの迅速な鎮静移行を促進'
+    }],
+    mol2: ['Linalool', 'リナロール', {
+      en: 'From Palmarosa (19.58%), Petitgrain (12.52%) & Ylang Ylang (12.24%). Induces alpha waves via GABAₐ receptor modulation.',
+      ja: 'パルマローザ（19.58%）・プチグレイン（12.52%）・イランイラン（12.24%）由来。GABAₐ受容体を介したα波誘導'
+    }],
+    staff: {
+      en: 'Staff will hand you a <strong>Roll-on Perfume</strong>. Apply to your inner wrists and notice the shift 30 seconds later.',
+      ja: 'スタッフから<strong>Roll-on Perfume</strong>を受け取り、手首内側に軽く塗布してお試しください。30秒後の体感変化をご確認ください。'
+    }
+  },
+  {
+    time: '22:00', zone: 'Recovery & Sleep Zone',
+    pressure: '1010', alert: '', temp: '20',
+    hrv: '52 ms', stress: '44%', ans: 'Parasympathetic', hrvBase: 52, rec: 2,
+    scene: {
+      en: 'Post-event — deep physical fatigue, still wired',
+      ja: 'イベント終了後 — 深い疲労と入眠前のリセット'
+    },
+    analysis: {
+      en: 'Deep physical fatigue with residual wakefulness detected. Vetiverol compounds (55%) from Vetiver (Sri Lanka) deliver deep grounding, while Geraniol from Palmarosa & Geranium accelerates parasympathetic shift and shortens sleep latency.',
+      ja: '深い身体疲労と覚醒継続を検知。ベチバー（スリランカ）由来のベチベロール類（55%）が深いグラウンディングをもたらし、パルマローザ・ゼラニウム由来のゲラニオールが自律神経の副交感移行を加速して回復睡眠を誘導します。'
+    },
+    mol1: ['Vetiverols', 'ベチベロール類', {
+      en: 'From Vetiver (Sri Lanka root, 55%). Deep grounding, sedation, cortisol reduction.',
+      ja: 'ベチバー（スリランカ・根）由来55%。グラウンディング・深部鎮静・コルチゾール低下促進'
+    }],
+    mol2: ['Geraniol', 'ゲラニオール', {
+      en: 'From Palmarosa (33.71%) & Geranium (19%). Accelerates PNS shift and reduces sleep onset latency.',
+      ja: 'パルマローザ（33.71%）・ゼラニウム（19%）由来。自律神経のPNS移行を加速し入眠潜時を短縮'
+    }],
+    staff: {
+      en: 'Staff will hand you a <strong>Tuning Mist</strong> sample. Imagine using it at your bedside and breathe it in.',
+      ja: 'スタッフから<strong>Tuning Mist</strong>のサンプルを受け取り、枕元でのご使用イメージでお試しください。'
+    }
+  },
+  {
+    time: '06:30', zone: 'Alpine Awakening · Clarity Zone',
+    pressure: '1013', alert: '', temp: '12',
+    hrv: '64 ms', stress: '21%', ans: 'Activating', hrvBase: 64, rec: 3,
+    scene: {
+      en: 'Alpine dawn — high HRV, optimal awakening window',
+      ja: 'アルプスの夜明け — 良好なHRVと自然覚醒の好機'
+    },
+    analysis: {
+      en: 'High HRV and low morning cortisol detected — optimal window to maximize wakeful clarity. 1,8-Cineole (80.89%) from Eucalyptus Globulus simultaneously opens airways and activates the cortex, while d-Limonene from Lemon & Mandarin ignites the morning emotional engine.',
+      ja: '良好なHRVと朝の低コルチゾール状態を検知。覚醒移行を最大化する好機。ユーカリ・グロブルス由来の1,8-シネオール（原料中80.89%）が呼吸器と大脳皮質を同時に賦活。レモン・マンダリン由来のd-リモネンが扁桃体の朝の情動エンジンを点火し、一日の集中力基盤を確立します。'
+    },
+    mol1: ['1,8-Cineole', '1,8-シネオール', {
+      en: 'From Eucalyptus Globulus (80.89%). Opens airways and activates cortex — establishes clear morning focus.',
+      ja: 'ユーカリ・グロブルス（原料中80.89%）由来。呼吸器開通と大脳皮質の朝の覚醒スイッチ・高い明晰感と集中力を確立'
+    }],
+    mol2: ['d-Limonene', 'd-リモネン', {
+      en: 'From Lemon (68%) & Mandarin (74.83%). Activates serotonin/dopamine pathway — mood elevation and morning motivation.',
+      ja: 'レモン（68%）・マンダリン（74.83%）由来。セロトニン/ドーパミン経路の朝活性化・気分高揚と意欲向上'
+    }],
+    staff: {
+      en: 'Staff will hand you a <strong>DAWN in Alps</strong> sample. Breathe deeply and picture the crisp mountain air of the Alps at first light.',
+      ja: 'スタッフから<strong>DAWN in Alps</strong>のサンプルをお渡しします。アルプスの朝の清冽な空気を思い描きながら、ゆっくりと深呼吸してご体感ください。'
+    }
+  }
+];
+
+// ══════════════════════════════════════════
+// LANGUAGE STRINGS
+// ══════════════════════════════════════════
+let currentLang = 'en';
+
+const STRINGS = {
+  en: {
+    badge_sensor: 'SENSOR CONNECTED', badge_camera: 'CAMERA ACTIVE', badge_api: 'API LIVE',
+    lbl_bio: 'Body · Biometric', lbl_env: 'Environment · Fukuoka Tenjin', lbl_ctx: 'Context · Situation',
+    lbl_hrv: 'HRV (RMSSD)', lbl_stress: 'Stress', lbl_ans: 'ANS Balance',
+    lbl_pressure: 'Pressure', lbl_humidity: 'Humidity', lbl_temp: 'Temp',
+    scan_start: 'START BIOMETRIC SCAN', await_text: 'Awaiting Scan Input',
+    eyebrow_ai: 'AI Analysis · Detected', eyebrow_rec: 'Optimal Formula · Recommendation',
+    eyebrow_mol: 'Active Molecules · Evidence',
+    opt_badge: 'Optimal', footer_label: 'Demo Mode', cam_face: 'Face the camera',
+    ptype: ['SPACE','SKIN','FABRIC','SPACE','SKIN','FABRIC'],
+    pname: ['Blend Essential Oil','Roll-on Perfume','Tuning Mist','Blend Essential Oil','Roll-on Perfume','Tuning Mist'],
+    mb: ['Morning · Low P','Midday · Tension','Night · Fatigue','Morning · Alps'],
+  },
+  ja: {
+    badge_sensor: 'センサー接続中', badge_camera: 'カメラ稼働中', badge_api: 'API ライブ',
+    lbl_bio: '身体 · バイオメトリック', lbl_env: '環境 · 福岡天神', lbl_ctx: 'コンテキスト · 状況',
+    lbl_hrv: 'HRV (RMSSD)', lbl_stress: 'ストレス', lbl_ans: '自律神経バランス',
+    lbl_pressure: '気圧', lbl_humidity: '湿度', lbl_temp: '気温',
+    scan_start: 'バイオメトリック計測 開始', await_text: 'スキャン待機中',
+    eyebrow_ai: 'AI分析 · 検知結果', eyebrow_rec: '最適処方 · レコメンド',
+    eyebrow_mol: '有効分子 · エビデンス',
+    opt_badge: '最適', footer_label: 'デモモード', cam_face: '顔をカメラに向けてください',
+    ptype: ['スペース','スキン','ファブリック','スペース','スキン','ファブリック'],
+    pname: ['ブレンドエッセンシャルオイル','ロールオンパフューム','チューニングミスト','ブレンドエッセンシャルオイル','ロールオンパフューム','チューニングミスト'],
+    mb: ['朝 · 低気圧','日中 · 緊張','夜 · 疲労','朝 · 覚醒'],
+  }
+};
+
+function applyLang() {
+  const s = STRINGS[currentLang];
+  const $= id => document.getElementById(id);
+  $('badge-sensor').textContent = s.badge_sensor;
+  $('badge-camera').textContent = s.badge_camera;
+  $('badge-api').textContent    = s.badge_api;
+  $('lbl-bio').textContent      = s.lbl_bio;
+  $('lbl-env').textContent      = s.lbl_env;
+  $('lbl-ctx').textContent      = s.lbl_ctx;
+  $('lbl-hrv').textContent      = s.lbl_hrv;
+  $('lbl-stress').textContent   = s.lbl_stress;
+  $('lbl-ans').textContent      = s.lbl_ans;
+  $('lbl-pressure').textContent = s.lbl_pressure;
+  $('lbl-humidity').textContent = s.lbl_humidity;
+  $('lbl-temp').textContent     = s.lbl_temp;
+  $('await-text').textContent   = s.await_text;
+  $('eyebrow-ai').textContent   = s.eyebrow_ai;
+  $('eyebrow-rec').textContent  = s.eyebrow_rec;
+  $('eyebrow-mol').textContent  = s.eyebrow_mol;
+  $('footer-label').textContent = s.footer_label;
+  $('cam-face-label').textContent = s.cam_face;
+  if (!scanning && !scanDone) $('scan-label').textContent = s.scan_start;
+  for (let i = 0; i < 6; i++) {
+    $('ptype-' + i).textContent  = s.ptype[i];
+    $('pname-' + i).textContent  = s.pname[i];
+    $('pbadge-' + i).textContent = s.opt_badge;
+  }
+  for (let i = 0; i < 4; i++) $('mb' + i).textContent = s.mb[i];
+  // update mode-dependent text
+  applyMode(currentMode);
+  // lang buttons
+  $('btn-en').classList.toggle('active', currentLang === 'en');
+  $('btn-ja').classList.toggle('active', currentLang === 'ja');
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  applyLang();
+}
+
+function applyMode(m) {
+  const d = MODES[m];
+  const lang = currentLang;
+  document.getElementById('v-time').textContent  = d.time;
+  document.getElementById('v-scene').textContent = d.scene[lang];
+  document.getElementById('v-zone').textContent  = d.zone;
+
+  // Use real weather when available, fall back to demo values
+  if (realWeather) {
+    document.getElementById('v-pressure').textContent = realWeather.pressure;
+    document.getElementById('v-temp').textContent     = realWeather.temp;
+    document.getElementById('v-humidity').textContent = realWeather.humidity;
+    const a = pressureAlert(realWeather.pressure);
+    document.getElementById('v-alert').textContent    = a;
+    document.getElementById('v-alert').style.visibility = a ? 'visible' : 'hidden';
+  } else {
+    document.getElementById('v-pressure').textContent = d.pressure;
+    document.getElementById('v-temp').textContent     = d.temp;
+    document.getElementById('v-alert').textContent    = d.alert;
+    document.getElementById('v-alert').style.visibility = d.alert ? 'visible' : 'hidden';
+  }
+
+  if (!scanDone) {
+    document.getElementById('v-hrv').textContent    = d.hrv;
+    document.getElementById('v-stress').textContent = d.stress;
+    document.getElementById('v-ans').textContent    = d.ans;
+  }
+
+  document.getElementById('v-analysis').textContent  = d.analysis[lang];
+  document.getElementById('v-mol1-name').textContent = d.mol1[0];
+  document.getElementById('v-mol1-jp').textContent   = d.mol1[1];
+  document.getElementById('v-mol1-fx').textContent   = d.mol1[2][lang];
+  document.getElementById('v-mol2-name').textContent = d.mol2[0];
+  document.getElementById('v-mol2-jp').textContent   = d.mol2[1];
+  document.getElementById('v-mol2-fx').textContent   = d.mol2[2][lang];
+  document.getElementById('v-staff').innerHTML       = d.staff[lang];
+
+  for (let i = 0; i < 6; i++) {
+    document.getElementById('prod-' + i).classList.toggle('opt', i === d.rec);
+  }
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('mb' + i).classList.toggle('on', i === m);
+  }
+}
+
+function setMode(m) {
+  currentMode = m;
+  applyMode(m);
+}
+
+// Live HRV flicker
+setInterval(() => {
+  if (scanning || ppgMode) return;
+  const base = MODES[currentMode].hrvBase;
+  const v = base + Math.round((Math.random() - 0.5) * 5);
+  document.getElementById('v-hrv').textContent = v + ' ms';
+}, 1800);
+
+applyMode(1);
+</script>
