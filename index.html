@@ -556,6 +556,38 @@ footer {
   letter-spacing: 0.18em; color: var(--text-lo); text-transform: uppercase;
   text-align: center;
 }
+.scan-bio-results {
+  padding: 18px 24px 14px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 10px;
+  animation: fadeUp 0.4s ease both;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.sbr-row {
+  display: flex; align-items: baseline; gap: 8px;
+}
+.sbr-label {
+  font-family: 'DM Mono', monospace; font-size: 7.5px;
+  letter-spacing: 0.18em; color: var(--text-lo); text-transform: uppercase;
+  flex: 1;
+}
+.sbr-val {
+  font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 700;
+  color: var(--gold); letter-spacing: 0.04em; line-height: 1;
+}
+.sbr-val-sm { font-size: 14px; }
+.sbr-unit {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  color: var(--text-lo); letter-spacing: 0.1em; width: 24px;
+}
+.sbr-hint {
+  font-family: 'DM Mono', monospace; font-size: 7px;
+  letter-spacing: 0.2em; color: var(--cyan); text-align: center;
+  text-transform: uppercase; margin-top: 4px;
+}
 
 /* sim-only state (no camera) */
 .scan-cam-wrap.sim-mode #scan-cam-display { display: none; }
@@ -823,6 +855,13 @@ footer {
           <div class="scan-modal-pbar" id="scan-modal-pbar"></div>
         </div>
         <div class="scan-modal-hint" id="scan-modal-hint">Keep still — measuring heart rate variability</div>
+      </div>
+      <div class="scan-bio-results" id="scan-bio-results" hidden>
+        <div class="sbr-row"><span class="sbr-label" id="sbr-l-hr">HEART RATE</span><span class="sbr-val" id="sbr-bpm">—</span><span class="sbr-unit">bpm</span></div>
+        <div class="sbr-row"><span class="sbr-label" id="sbr-l-hrv">HRV (RMSSD)</span><span class="sbr-val" id="sbr-hrv">—</span><span class="sbr-unit">ms</span></div>
+        <div class="sbr-row"><span class="sbr-label" id="sbr-l-stress">STRESS INDEX</span><span class="sbr-val" id="sbr-stress">—</span><span class="sbr-unit">%</span></div>
+        <div class="sbr-row"><span class="sbr-label" id="sbr-l-ans">ANS STATE</span><span class="sbr-val sbr-val-sm" id="sbr-ans">—</span><span class="sbr-unit"></span></div>
+        <div class="sbr-hint" id="sbr-hint">Generating prescription…</div>
       </div>
     </div>
   </div>
@@ -1229,6 +1268,29 @@ function showScanOverlay(camMode) {
 
 function hideScanOverlay() {
   document.getElementById('scan-overlay').classList.remove('active');
+  document.getElementById('scan-bio-results').hidden = true;
+}
+
+function showBioResults(m, onDone) {
+  const el = document.getElementById('scan-bio-results');
+  // Populate i18n labels
+  const ja = currentLang === 'ja';
+  document.getElementById('sbr-l-hr').textContent     = ja ? '心拍数'       : 'HEART RATE';
+  document.getElementById('sbr-l-hrv').textContent    = ja ? 'HRV (RMSSD)'  : 'HRV (RMSSD)';
+  document.getElementById('sbr-l-stress').textContent = ja ? 'ストレス指数'  : 'STRESS INDEX';
+  document.getElementById('sbr-l-ans').textContent    = ja ? '自律神経状態'  : 'ANS STATE';
+  document.getElementById('sbr-hint').textContent     = ja ? 'プレスクリプション生成中…' : 'Generating prescription…';
+
+  document.getElementById('sbr-bpm').textContent    = m.bpm;
+  document.getElementById('sbr-hrv').textContent    = m.rmssd;
+  document.getElementById('sbr-stress').textContent = m.stress;
+  document.getElementById('sbr-ans').textContent    = m.ans;
+
+  el.hidden = false;
+  setTimeout(() => {
+    document.getElementById('sbr-hint').textContent = ja ? '✓  解析完了 — 処方を表示' : '✓  Analysis complete — showing prescription';
+    setTimeout(onDone, 1200);
+  }, 2000);
 }
 
 function setOverlayStatus(text) {
@@ -1322,8 +1384,11 @@ async function startScan() {
     }
 
     setOverlayStatus(currentLang === 'ja' ? '✓  計測完了' : '✓  SCAN COMPLETE');
-    setTimeout(hideScanOverlay, 900);
-    showResults();
+    if (lastMetrics) {
+      showBioResults(lastMetrics, () => { hideScanOverlay(); showResults(); });
+    } else {
+      setTimeout(() => { hideScanOverlay(); showResults(); }, 900);
+    }
   }
 
   requestAnimationFrame(tick);
@@ -1366,8 +1431,7 @@ function runSimScan(btn, label, pbar, opbar) {
     lastMetrics = { bpm, rmssd, stress, ans };
     label.textContent = currentLang === 'ja' ? '✓  計測完了' : '✓  SCAN COMPLETE';
     setOverlayStatus(currentLang === 'ja' ? '✓  計測完了' : '✓  SCAN COMPLETE');
-    setTimeout(hideScanOverlay, 900);
-    showResults();
+    showBioResults(lastMetrics, () => { hideScanOverlay(); showResults(); });
   }
 
   requestAnimationFrame(tick);
@@ -1420,6 +1484,22 @@ function showResults() {
     // Override scene with actual measurement summary
     const scene = buildSceneText(lastMetrics);
     if (scene) document.getElementById('v-scene').textContent = scene[currentLang];
+
+    // Dynamic zone tag based on ANS + stress
+    const { stress, ans } = lastMetrics;
+    const p = realWeather ? realWeather.pressure : 1013;
+    const zoneEn = stress > 65 ? 'High Tension Zone'
+                 : stress > 48 ? 'Sympathetic Dominance Zone'
+                 : stress > 32 ? 'Balanced ANS Zone'
+                 : 'Parasympathetic · Recovery Zone';
+    const zoneJa = stress > 65 ? '高緊張ゾーン'
+                 : stress > 48 ? '交感神経優位ゾーン'
+                 : stress > 32 ? '自律神経バランスゾーン'
+                 : '副交感神経 · リカバリーゾーン';
+    const pTagEn = p < 1006 ? '  ·  Low Pressure' : '';
+    const pTagJa = p < 1006 ? '  ·  低気圧' : '';
+    document.getElementById('v-zone').textContent =
+      (currentLang === 'ja' ? zoneJa + pTagJa : zoneEn + pTagEn);
 
     // Show real current time
     const hhmm = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
