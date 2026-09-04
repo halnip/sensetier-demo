@@ -1485,8 +1485,7 @@ function showResults() {
     const scene = buildSceneText(lastMetrics);
     if (scene) document.getElementById('v-scene').textContent = scene[currentLang];
 
-    // Dynamic zone tag based on ANS + stress
-    const { stress, ans } = lastMetrics;
+    // Dynamic zone tag based on ANS + stress (stress/ans already destructured above)
     const p = realWeather ? realWeather.pressure : 1013;
     const zoneEn = stress > 65 ? 'High Tension Zone'
                  : stress > 48 ? 'Sympathetic Dominance Zone'
