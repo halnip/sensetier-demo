@@ -979,6 +979,8 @@ let procCtx     = null;
 let camDispCanvas = null;
 let camDispCtx  = null;
 
+let lastMetrics = null;
+
 let ppgRaw      = [];
 let ppgTimes    = [];
 let sampleTimer = null;
@@ -1312,6 +1314,7 @@ async function startScan() {
     label.textContent = currentLang === 'ja' ? '✓  計測完了' : '✓  SCAN COMPLETE';
 
     if (metrics) {
+      lastMetrics = metrics;
       document.getElementById('v-hrv').textContent    = metrics.rmssd + ' ms';
       document.getElementById('v-stress').textContent = metrics.stress + '%';
       document.getElementById('v-ans').textContent    = metrics.ans;
@@ -1351,6 +1354,16 @@ function runSimScan(btn, label, pbar, opbar) {
     pbar.style.background = '#c5a880';
     pbar.style.boxShadow  = '0 0 10px #c5a880';
     if (opbar) opbar.style.background = '#c5a880';
+    // Simulate plausible metrics for demo mode
+    const rmssd = 28 + Math.round(Math.random() * 20);
+    const bpm   = 70 + Math.round(Math.random() * 14);
+    const stress = Math.max(15, Math.min(88, Math.round(100 - (rmssd / 65) * 80)));
+    let ans;
+    if      (rmssd < 18) ans = 'Sympathetic ↑↑';
+    else if (rmssd < 30) ans = 'Sympathetic';
+    else if (rmssd < 48) ans = 'Balanced';
+    else                 ans = 'Parasympathetic';
+    lastMetrics = { bpm, rmssd, stress, ans };
     label.textContent = currentLang === 'ja' ? '✓  計測完了' : '✓  SCAN COMPLETE';
     setOverlayStatus(currentLang === 'ja' ? '✓  計測完了' : '✓  SCAN COMPLETE');
     setTimeout(hideScanOverlay, 900);
@@ -1360,8 +1373,59 @@ function runSimScan(btn, label, pbar, opbar) {
   requestAnimationFrame(tick);
 }
 
+function selectModeFromMetrics(m) {
+  const stress = m ? m.stress : 60;
+  const rmssd  = m ? m.rmssd  : 35;
+  const p = realWeather ? realWeather.pressure : 1013;
+  const h = new Date().getHours();
+
+  if ((h >= 21 || h < 6) && stress > 45) return 2;  // Night fatigue → BREEZE Mist
+  if (stress > 62 && rmssd < 38) return 1;            // High tension  → BREEZE Roll-on
+  if (p < 1006 && stress > 42) return 0;              // Low pressure  → BREEZE Oil
+  if (stress < 42 && rmssd > 44) return 3;            // Calm/alert    → DAWN Oil
+  return 1;
+}
+
+function buildSceneText(m) {
+  if (!m) return null;
+  const { bpm, rmssd, stress, ans } = m;
+  const p = realWeather ? realWeather.pressure : null;
+
+  const stateEn = stress > 65 ? 'high tension' : stress > 45 ? 'moderate stress' : 'calm & alert';
+  const stateJa = stress > 65 ? '高緊張状態'   : stress > 45 ? '中程度のストレス' : '落ち着いた覚醒状態';
+  const pNoteEn = p && p < 1008 ? `  ·  ${p} hPa low pressure` : '';
+  const pNoteJa = p && p < 1008 ? `  ·  ${p} hPa 低気圧` : '';
+
+  return {
+    en: `HR ${bpm} bpm  ·  HRV ${rmssd} ms  ·  ${stateEn}${pNoteEn}`,
+    ja: `心拍 ${bpm} bpm  ·  HRV ${rmssd} ms  ·  ${stateJa}${pNoteJa}`
+  };
+}
+
 function showResults() {
+  // Auto-select best mode based on actual scan data
+  const mode = selectModeFromMetrics(lastMetrics);
+  currentMode = mode;
+  document.querySelectorAll('.mb').forEach((b, i) => b.classList.toggle('active', i === currentMode));
+
   applyMode(currentMode);
+
+  // Override biometric values with real scan results
+  if (lastMetrics) {
+    const { bpm, rmssd, stress, ans } = lastMetrics;
+    document.getElementById('v-hrv').textContent    = rmssd + ' ms';
+    document.getElementById('v-stress').textContent = stress + '%';
+    document.getElementById('v-ans').textContent    = ans;
+
+    // Override scene with actual measurement summary
+    const scene = buildSceneText(lastMetrics);
+    if (scene) document.getElementById('v-scene').textContent = scene[currentLang];
+
+    // Show real current time
+    const hhmm = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('v-time').textContent = hhmm;
+  }
+
   const aw = document.getElementById('await-state');
   aw.style.opacity = '0'; aw.style.pointerEvents = 'none';
   setTimeout(() => {
