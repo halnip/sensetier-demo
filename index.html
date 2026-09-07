@@ -4,23 +4,23 @@
 
 <style>
 :root {
-  --bg-void:   #090b0e;
-  --bg-raised: #121820;
-  --gold:      #c5a880;
-  --gold-hi:   #dcc9a8;
-  --gold-lo:   #6e5c40;
-  --gold-glow: rgba(197,168,128,0.10);
-  --gold-rim:  rgba(197,168,128,0.22);
-  --cyan:      #4bc0c8;
-  --cyan-dim:  rgba(75,192,200,0.18);
-  --cyan-rim:  rgba(75,192,200,0.28);
-  --amber:     #c87c4b;
-  --green:     #3db88a;
-  --text-hi:   #e4dcd0;
-  --text-mid:  #8a8070;
-  --text-lo:   #42403c;
-  --border:    rgba(197,168,128,0.10);
-  --border-hi: rgba(197,168,128,0.22);
+  --bg-void:   #f0ebe4;
+  --bg-raised: #ffffff;
+  --gold:      #a07040;
+  --gold-hi:   #c5a880;
+  --gold-lo:   #d4b890;
+  --gold-glow: rgba(160,112,64,0.08);
+  --gold-rim:  rgba(160,112,64,0.20);
+  --cyan:      #1a7e86;
+  --cyan-dim:  rgba(26,126,134,0.10);
+  --cyan-rim:  rgba(26,126,134,0.24);
+  --amber:     #b05820;
+  --green:     #24916a;
+  --text-hi:   #1a1612;
+  --text-mid:  #6a6058;
+  --text-lo:   #a89b8c;
+  --border:    rgba(80,60,40,0.10);
+  --border-hi: rgba(80,60,40,0.22);
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -37,8 +37,8 @@ html, body {
 
 body {
   background:
-    radial-gradient(ellipse 70% 60% at 15% 0%, #14202e 0%, transparent 70%),
-    radial-gradient(ellipse 40% 40% at 85% 100%, #0a1420 0%, transparent 60%),
+    radial-gradient(ellipse 70% 60% at 15% 0%, #e8ddd0 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 85% 100%, #d8e8ea 0%, transparent 60%),
     var(--bg-void);
 }
 
@@ -49,7 +49,7 @@ header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 28px; height: 54px; flex-shrink: 0;
   border-bottom: 1px solid var(--border);
-  background: rgba(9,11,14,0.85);
+  background: rgba(240,235,228,0.92);
   backdrop-filter: blur(16px);
 }
 
@@ -400,7 +400,7 @@ footer {
   display: flex; align-items: center; justify-content: center;
   gap: 8px; height: 46px; flex-shrink: 0;
   border-top: 1px solid var(--border);
-  background: rgba(9,11,14,0.9);
+  background: rgba(240,235,228,0.95);
   padding: 0 24px;
 }
 
@@ -455,8 +455,8 @@ footer {
 .scan-overlay {
   display: none;
   position: fixed; inset: 0; z-index: 200;
-  background: rgba(6,9,12,0.88);
-  backdrop-filter: blur(24px) saturate(0.6);
+  background: rgba(200,190,180,0.72);
+  backdrop-filter: blur(24px) saturate(0.8);
   align-items: center; justify-content: center;
 }
 .scan-overlay.active { display: flex; }
