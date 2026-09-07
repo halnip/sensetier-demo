@@ -1696,9 +1696,14 @@ function setLang(lang) {
 function applyMode(m) {
   const d = MODES[m];
   const lang = currentLang;
-  document.getElementById('v-time').textContent  = d.time;
-  document.getElementById('v-scene').textContent = d.scene[lang];
-  document.getElementById('v-zone').textContent  = d.zone;
+  const hhmm = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('v-time').textContent  = scanDone ? hhmm : '——:——';
+  document.getElementById('v-scene').textContent = scanDone
+    ? d.scene[lang]
+    : (lang === 'ja' ? 'スキャンして状態を計測してください' : 'Scan to analyze your biometric state');
+  document.getElementById('v-zone').textContent  = scanDone
+    ? d.zone
+    : (lang === 'ja' ? '— 計測待機中 —' : '— Awaiting Analysis —');
 
   // Use real weather when available, fall back to demo values
   if (realWeather) {
@@ -1721,7 +1726,9 @@ function applyMode(m) {
     document.getElementById('v-ans').textContent    = d.ans;
   }
 
-  document.getElementById('v-analysis').textContent  = d.analysis[lang];
+  document.getElementById('v-analysis').textContent = scanDone
+    ? d.analysis[lang]
+    : (lang === 'ja' ? 'スキャン完了後に分子レベルの分析結果が表示されます。' : 'Molecular analysis will appear after your biometric scan.');
   document.getElementById('v-mol1-name').textContent = d.mol1[0];
   document.getElementById('v-mol1-jp').textContent   = d.mol1[1];
   document.getElementById('v-mol1-fx').textContent   = d.mol1[2][lang];
